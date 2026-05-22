@@ -1,3 +1,5 @@
+<?php $imgPath = "assets/images/"; ?>
+
 <?php
 session_start();
 
@@ -25,53 +27,17 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
 
 <style>
 
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
 body{
-    font-family: 'Poppins', sans-serif;
-    overflow: hidden;
-}
-
-.hero{
-    height: 100vh;
-
     background:
-    linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
-    url('hero.jpg');
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+        url('assets/images/bg.jpg');
 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-
+    min-height: 100vh;
     color: white;
-}
-
-.hero-card{
-    background: rgba(255,255,255,0.12);
-    backdrop-filter: blur(10px);
-
-    padding: 60px;
-    border-radius: 25px;
-
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-
-    max-width: 700px;
-
-    animation: fadeIn 1s ease;
-}
-
-.hero-title{
-    font-size: 4rem;
-    font-weight: 700;
-}
-
-.hero-text{
-    font-size: 1.2rem;
-    color: #e4e4e4;
 }
 
 .btn-travel{
