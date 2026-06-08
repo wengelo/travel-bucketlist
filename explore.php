@@ -13,7 +13,7 @@ include 'db.php';
 
 $where = [];
 $params = [];
-$types = "";
+
 
 $search = $_GET['search'] ?? '';
 $continent = $_GET['continent'] ?? '';
@@ -24,19 +24,19 @@ if (!empty($search)) {
     $searchTerm = "%$search%";
     $params[] = $searchTerm;
     $params[] = $searchTerm;
-    $types .= "ss";
+   
 }
 
 if (!empty($continent)) {
     $where[] = "continent = ?";
     $params[] = $continent;
-    $types .= "s";
+  
 }
 
 if (!empty($category)) {
     $where[] = "category = ?";
     $params[] = $category;
-    $types .= "s";
+  
 }
 
 $sql = "SELECT * FROM destinations";
@@ -47,13 +47,9 @@ if (count($where) > 0) {
 
 $stmt = $conn->prepare($sql);
 
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
+$stmt->execute($params);
 
-$stmt->execute();
-
-$result = $stmt->get_result();
+$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 
@@ -132,9 +128,8 @@ $result = $stmt->get_result();
         </form>
 
         <div class="row">
-
-            <?php if ($result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
+<?php if (!empty($result)): ?>
+    <?php foreach ($result as $row): ?>
 
                     <div class="col-md-4 mb-4">
                         <div class="card shadow-sm h-100">
@@ -186,7 +181,7 @@ $result = $stmt->get_result();
                         </div>
                     </div>
 
-                <?php endwhile; ?>
+                <?php endforeach; ?>
 
             <?php else: ?>
                 <p class="text-center text-muted">No destinations found 😢</p>

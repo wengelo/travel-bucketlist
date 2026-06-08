@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $review_id = (int) $_POST['review_id'];
@@ -20,43 +21,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Invalid input.");
     }
 
-    
+  
     $stmt = $conn->prepare("
         UPDATE reviews 
         SET rating = ?, comment = ?, updated_at = NOW()
         WHERE id = ? AND user_id = ?
     ");
-    $stmt->bind_param("isii", $rating, $comment, $review_id, $user_id);
-    $stmt->execute();
 
-    $stmt = $conn->prepare("SELECT destination_id FROM reviews WHERE id = ?");
-    $stmt->bind_param("i", $review_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
+    $stmt->execute([
+        $rating,
+        $comment,
+        $review_id,
+        $user_id
+    ]);
+
+    $stmt = $conn->prepare("
+        SELECT destination_id 
+        FROM reviews 
+        WHERE id = ?
+    ");
+
+    $stmt->execute([$review_id]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     header("Location: details.php?id=" . $row['destination_id']);
     exit();
 }
 
 
+
 $review_id = (int) ($_GET['id'] ?? 0);
 
 $stmt = $conn->prepare("
-    SELECT * FROM reviews 
+    SELECT * 
+    FROM reviews 
     WHERE id = ? AND user_id = ?
 ");
-$stmt->bind_param("ii", $review_id, $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
 
-if ($result->num_rows === 0) {
+$stmt->execute([
+    $review_id,
+    $user_id
+]);
+
+$review = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+if (!$review) {
     header("Location: explore.php");
-exit();
+    exit();
 }
-
-$review = $result->fetch_assoc();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -78,29 +93,23 @@ $review = $result->fetch_assoc();
         <form method="POST">
 
             <input type="hidden" name="review_id"
-                   value="<?php echo $review['id']; ?>">
+                   value="<?= $review['id']; ?>">
 
-            
             <div class="mb-3">
                 <label class="form-label">Rating</label>
 
                 <select name="rating" class="form-select" required>
 
                     <?php for ($i = 1; $i <= 5; $i++): ?>
-
-                        <option value="<?php echo $i; ?>"
-                            <?php if ($review['rating'] == $i) echo 'selected'; ?>>
-
-                            <?php echo $i; ?> ⭐
-
+                        <option value="<?= $i; ?>"
+                            <?= ($review['rating'] == $i) ? 'selected' : ''; ?>>
+                            <?= $i; ?> ⭐
                         </option>
-
                     <?php endfor; ?>
 
                 </select>
             </div>
 
-            
             <div class="mb-3">
 
                 <label class="form-label">Comment</label>
@@ -109,11 +118,10 @@ $review = $result->fetch_assoc();
                     name="comment"
                     class="form-control"
                     rows="5"
-                    required><?php echo htmlspecialchars($review['comment']); ?></textarea>
+                    required><?= htmlspecialchars($review['comment']); ?></textarea>
 
             </div>
 
-            
             <div class="d-flex gap-2">
 
                 <button type="submit" class="btn btn-dark">
@@ -122,9 +130,7 @@ $review = $result->fetch_assoc();
 
                 <a href="javascript:history.back()"
                    class="btn btn-outline-secondary">
-
                     Cancel
-
                 </a>
 
             </div>

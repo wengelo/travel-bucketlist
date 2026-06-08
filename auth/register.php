@@ -2,16 +2,7 @@
 
 session_start();
 
-$host = "localhost";
-$dbname = "travel_bucketlist";
-$username_db = "root";
-$password_db = "";
-
-$conn = new mysqli($host, $username_db, $password_db, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
@@ -32,28 +23,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         $check = $conn->prepare("SELECT id FROM users WHERE username = ?");
-        $check->bind_param("s", $username);
-        $check->execute();
+        $check->execute([$username]);
 
-        $result = $check->get_result();
+        $result = $check->fetch(PDO::FETCH_ASSOC);
 
-        if ($result->num_rows > 0) {
-
+        if ($result) {
             $error = "Username already exists";
         } else {
 
             $sql = "INSERT INTO users (username, email, password)
-                    VALUES (?, ?, ?)";
+            VALUES (?, ?, ?)";
 
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sss", $username, $email, $hashedPassword);
 
-            if ($stmt->execute()) {
+            if ($stmt->execute([$username, $email, $hashedPassword])) {
 
                 header("Location: login.php");
                 exit;
             } else {
-
                 $error = "Something went wrong";
             }
         }
@@ -75,15 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <style>
         body {
-    background:
-        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
-        url('travel-bg.jpg');
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+                url('travel-bg.jpg');
 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    height: 100vh;
-}
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+        }
 
         .auth-card {
             width: 450px;

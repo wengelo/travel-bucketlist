@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 include 'db.php';
@@ -12,21 +13,29 @@ $destination_id = (int)$_GET['id'];
 
 
 $stmt = $conn->prepare("
-    SELECT 1 FROM user_destinations 
+    SELECT 1
+    FROM user_destinations
     WHERE user_id = ? AND destination_id = ?
 ");
-$stmt->bind_param("ii", $user_id, $destination_id);
-$stmt->execute();
-$result = $stmt->get_result();
 
-if ($result->num_rows == 0) {
+$stmt->execute([
+    $user_id,
+    $destination_id
+]);
+
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$result) {
 
     $insert = $conn->prepare("
-        INSERT INTO user_destinations (user_id, destination_id, status) 
+        INSERT INTO user_destinations (user_id, destination_id, status)
         VALUES (?, ?, 'planned')
     ");
-    $insert->bind_param("ii", $user_id, $destination_id);
-    $insert->execute();
+
+    $insert->execute([
+        $user_id,
+        $destination_id
+    ]);
 }
 
 header("Location: explore.php");

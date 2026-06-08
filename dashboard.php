@@ -12,17 +12,32 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+$stmt = $conn->prepare("
+    SELECT COUNT(*) as c
+    FROM user_destinations
+    WHERE user_id = ? AND status = 'planned'
+");
+$stmt->execute([$user_id]);
+$planned = $stmt->fetch(PDO::FETCH_ASSOC)['c'];
 
-$planned = $conn->query("SELECT COUNT(*) as c FROM user_destinations WHERE user_id='$user_id' AND status='planned'")->fetch_assoc()['c'];
-$visited = $conn->query("SELECT COUNT(*) as c FROM user_destinations WHERE user_id='$user_id' AND status='visited'")->fetch_assoc()['c'];
+$stmt = $conn->prepare("
+    SELECT COUNT(*) as c
+    FROM user_destinations
+    WHERE user_id = ? AND status = 'visited'
+");
+$stmt->execute([$user_id]);
+$visited = $stmt->fetch(PDO::FETCH_ASSOC)['c'];
 
+$stmt = $conn->prepare("
+    SELECT ud.id as user_dest_id, ud.status, d.*
+    FROM user_destinations ud
+    JOIN destinations d ON ud.destination_id = d.id
+    WHERE ud.user_id = ?
+");
 
-$sql = "SELECT ud.id as user_dest_id, ud.status, d.*
-        FROM user_destinations ud
-        JOIN destinations d ON ud.destination_id = d.id
-        WHERE ud.user_id='$user_id'";
+$stmt->execute([$user_id]);
 
-$result = $conn->query($sql);
+$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -88,9 +103,8 @@ $result = $conn->query($sql);
         <h3 class="mb-3">📍 Your Destinations</h3>
 
         <div class="row">
-
-            <?php if ($result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
+<?php if (count($result) > 0): ?>
+    <?php foreach ($result as $row): ?>
 
                     <div class="col-md-4 mb-4">
                         <div class="card shadow-sm h-100">
@@ -132,7 +146,7 @@ $result = $conn->query($sql);
                         </div>
                     </div>
 
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             <?php else: ?>
                 <p class="text-muted">No destinations added yet 😢</p>
             <?php endif; ?>

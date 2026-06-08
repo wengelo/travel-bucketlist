@@ -14,16 +14,13 @@ $id = intval($_GET['id'] ?? 0);
 
 
 $stmt = $conn->prepare("SELECT * FROM destinations WHERE id = ?");
-$stmt->bind_param("i", $id);
-$stmt->execute();
+$stmt->execute([$id]);
 
-$destResult = $stmt->get_result();
+$destination = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($destResult->num_rows == 0) {
+if (!$destination) {
     die("Destination not found.");
 }
-
-$destination = $destResult->fetch_assoc();
 
 
 $reviewStmt = $conn->prepare("
@@ -34,10 +31,9 @@ $reviewStmt = $conn->prepare("
     ORDER BY r.created_at DESC
 ");
 
-$reviewStmt->bind_param("i", $id);
-$reviewStmt->execute();
+$reviewStmt->execute([$id]);
 
-$reviews = $reviewStmt->get_result();
+$reviews = $reviewStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -92,7 +88,7 @@ $reviews = $reviewStmt->get_result();
 
         <h3 class="mb-3">Reviews</h3>
 
-        <?php while ($rev = $reviews->fetch_assoc()): ?>
+        <?php foreach($reviews as $rev): ?>
             <div class="review">
                 <strong><?php echo htmlspecialchars($rev['username']); ?></strong>
                 <span>⭐ <?php echo $rev['rating']; ?>/5</span>
@@ -114,7 +110,7 @@ $reviews = $reviewStmt->get_result();
                     </div>
                 <?php endif; ?>
             </div>
-        <?php endwhile; ?>
+        <?php endforeach; ?>
 
 
         <div class="mt-5">

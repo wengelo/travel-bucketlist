@@ -10,7 +10,6 @@ $stmt = $conn->prepare("
     WHERE id = ? AND user_id = ?
 ");
 
-$stmt->bind_param("ii", $row_id, $user_id);
 $stmt->execute();
 
 header("Location: dashboard.php");

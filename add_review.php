@@ -27,10 +27,15 @@ $stmt = $conn->prepare("
     INSERT INTO reviews (user_id, destination_id, rating, comment, created_at)
     VALUES (?, ?, ?, ?, NOW())
 ");
-$stmt->bind_param("iiis", $user_id, $destination_id, $rating, $comment);
-$stmt->execute();
 
-
+$stmt->execute([
+    $user_id,
+    $destination_id,
+    $rating,
+    $comment
+]);
 
 header("Location: details.php?id=" . $destination_id);
 exit();
+
+
