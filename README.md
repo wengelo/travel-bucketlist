@@ -41,7 +41,7 @@ Download of clone de repository:https://github.com/wengelo/travel-bucketlist.git
 - Selecteer het bestand `database.sql`
 
 ### 3. Configuratie
-Controleer in `includes/db.php` of je database instellingen kloppen:
+Controleer in `db.php` of je database instellingen kloppen:
 
 ```php
 $host = "localhost";
